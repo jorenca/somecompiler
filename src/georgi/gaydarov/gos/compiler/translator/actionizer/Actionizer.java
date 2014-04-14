@@ -22,6 +22,10 @@ public class Actionizer {
 			case DECLARATION:
 				simplifyAllocation(statement);
 				break;
+
+			case SIMPLE_OPERATION:
+				result.add(simplifySimpleOperation(statement));
+				break;
 				
 			case DIRECT_ASSIGNMENT:
 				result.add(simplifyDirectAssignment(statement));
@@ -29,6 +33,10 @@ public class Actionizer {
 				
 			case SIMPLE_ASSIGNMENT:
 				result.addAll(simplifySimpleAssignment(statement));
+				break;
+				
+			case FUNCTION_CALL:
+				result.add(simplifyFunctionInvocation(statement));
 				break;
 				
 				// TODO add more cases here
@@ -40,72 +48,28 @@ public class Actionizer {
 	private static void simplifyAllocation(RawStatement statement)
 	{
 		// <var_keyword> <name_name>
-		//assertTokenType(statement, 0, TokenType.VAR_DECLARATION);
-		//assertTokenType(statement, 1, TokenType.VAR_NAME);
-		
 		Token nameToken = statement.get(1);
 		String varName = nameToken.getValue();
 		mapper.allocateVariable(varName);
 	}
 	
-	private static Operation simplifyDirectAssignment(RawStatement statement)
+	private static Operation simplifySimpleOperation(RawStatement statement)
 	{
-		// <var_name> = <var_name or literal>
-		// assertTokenType(statement, 0, TokenType.VAR_NAME);
-		assertTokenValue(statement, 1, "=");
-		
-		String varName = statement.get(0).getValue();
-		short destination = mapper.getVariableAddress(varName);
-		
-		Token value = statement.get(2);
-		String valueContent = value.getValue();
-		TokenType valueType = value.getType();
-		
-		Operation result = new Operation(Instruction.MOV);
-		result.setAddress1(destination);
-		switch(valueType)
-		{
-			case LITERAL:
-				result.setOperands(Operands.AL);
-				result.setLiteral(Byte.parseByte(valueContent));
-				break;
-			case VAR_NAME:
-				result.setOperands(Operands.AA);
-				result.setAddress2(mapper.getVariableAddress(valueContent));
-				break;
-		}
-		return result;
-	}
-	
-	private static List<Operation> simplifySimpleAssignment(RawStatement statement)
-	{
-		// <var_name> = <var_name or literal> <operation> <var_name or literal>
+		// <var_name> <operation> = <var_name or literal>
 		String resultVarName = statement.get(0).getValue();
 		short resultAddress = mapper.getVariableAddress(resultVarName);
-		assertTokenValue(statement, 1, "=");
 		
-		Token operand1 = statement.get(2);
-		Token operation = statement.get(3);
-		Token operand2 = statement.get(4);
+		Token operation = statement.get(1);
+		char operationRepresentation = operation.getValue().charAt(0);
 		
-		Operation mov = new Operation(Instruction.MOV);
-		mov.setAddress1(resultAddress);
-		Instruction operationInstruction = InstructionResolver.resolve(operation);
-		Operation op = new Operation(operationInstruction);
+		assertTokenValue(statement, 2, "=");
+		
+		Token operand2 = statement.get(3);
+
+		Instruction operationInstruction = Instruction.getByRepresentation(operationRepresentation);
+		Operation op = new Operation();
+		op.setInstruction(operationInstruction);
 		op.setAddress1(resultAddress);
-		
-		switch(operand1.getType())
-		{
-			case LITERAL:
-				mov.setOperands(Operands.AL);
-				mov.setLiteral(Byte.parseByte(operand1.getValue()));
-				break;
-			case VAR_NAME:
-				mov.setOperands(Operands.AA);
-				mov.setAddress2(mapper.getVariableAddress(operand1.getValue()));
-				break;
-		}
-		
 		switch(operand2.getType())
 		{
 			case LITERAL:
@@ -118,9 +82,74 @@ public class Actionizer {
 				break;
 		}
 		
+		return op;
+	}
+	
+	private static Operation simplifyDirectAssignment(RawStatement statement)
+	{
+		// <var_name> = <var_name or literal>
+		Token destination = statement.get(0);
+		assertTokenValue(statement, 1, "=");
+		Token operand = statement.get(2);
+		
+		RawStatement movStatement = new RawStatement();
+		movStatement.add(destination);
+		movStatement.add(new Token(String.valueOf(Instruction.MOV.getRepresentation()), TokenType.OPERATION));
+		movStatement.add(new Token("=", TokenType.OPERATION));
+		movStatement.add(operand);
+		
+		return simplifySimpleOperation(movStatement);
+	}
+	
+	private static List<Operation> simplifySimpleAssignment(RawStatement statement)
+	{
+		// <var_name> = <var_name or literal> <operation> <var_name or literal>
+		Token destination = statement.get(0);
+		assertTokenValue(statement, 1, "=");
+		Token operand1 = statement.get(2);
+		Token operation = statement.get(3);
+		Token operand2 = statement.get(4);
+		
+		RawStatement movStatement = new RawStatement();
+		movStatement.add(destination);
+		movStatement.add(new Token("=", TokenType.OPERATION));
+		movStatement.add(operand1);
+		Operation mov = simplifyDirectAssignment(movStatement);
+		
+		RawStatement opStatement = new RawStatement();
+		opStatement.add(destination);
+		opStatement.add(operation);
+		opStatement.add(new Token("=", TokenType.OPERATION));
+		opStatement.add(operand2);
+		Operation op = simplifySimpleOperation(opStatement);
+		
+		
 		List<Operation> result = new LinkedList<Operation>();
 		result.add(mov);
 		result.add(op);
+		return result;
+	}
+	
+	private static Operation simplifyFunctionInvocation(RawStatement statement)
+	{
+		// <function_name>! <var_name or literal>
+		Token functionName = statement.get(0);
+		short functionAddress = FunctionMapper.map(functionName.getValue());
+		Token operand = statement.get(1);
+		
+		Operation result = new Operation(Instruction.CALL);
+		result.setAddress1(functionAddress);
+		switch(operand.getType())
+		{
+			case LITERAL:
+				result.setOperands(Operands.AL);
+				result.setLiteral(Byte.parseByte(operand.getValue()));
+				break;
+			case VAR_NAME:
+				result.setOperands(Operands.AA);
+				result.setAddress2(mapper.getVariableAddress(operand.getValue()));
+				break;
+		}
 		return result;
 	}
 	

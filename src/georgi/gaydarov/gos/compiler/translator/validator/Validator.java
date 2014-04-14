@@ -11,6 +11,7 @@ import java.util.List;
 public class Validator {
 	private static final String DECLARATION_PATTERN = "DN";
 	private static final String DIRECT_ASSIGNMENT_PATTERN = "NO[NL]";
+	private static final String SIMPLE_OPERATION_PATTERN = "NOO[NL]";
 	private static final String SIMPLE_ASSIGNMENT_PATTERN = "NO[NL]O[NL]";
 	private static final String COMPLEX_ASSIGNMENT_PATTERN = "NO([NL]O){2,}[NL]";
 	private static final String FUNCTION_CALL_PATTERN = "F[NL]";
@@ -21,6 +22,10 @@ public class Validator {
 		if(statementRepresentation.matches(DECLARATION_PATTERN))
 		{
 			return RawStatementType.DECLARATION;
+		}
+		else if(statementRepresentation.matches(SIMPLE_OPERATION_PATTERN))
+		{
+			return RawStatementType.SIMPLE_OPERATION;
 		}
 		else if(statementRepresentation.matches(DIRECT_ASSIGNMENT_PATTERN))
 		{
