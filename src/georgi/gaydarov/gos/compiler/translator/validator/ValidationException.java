@@ -1,4 +1,4 @@
-package georgi.gaydarov.gos.compiler.syntaxvalidator;
+package georgi.gaydarov.gos.compiler.translator.validator;
 
 public class ValidationException extends RuntimeException{
 	/**

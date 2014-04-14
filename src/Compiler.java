@@ -1,8 +1,8 @@
-import georgi.gaydarov.gos.compiler.syntaxvalidator.Validator;
 import georgi.gaydarov.gos.compiler.tokenizing.Token;
 import georgi.gaydarov.gos.compiler.tokenizing.Tokenizer;
 import georgi.gaydarov.gos.compiler.translator.Translator;
-import georgi.gaydarov.gos.compiler.translator.actionizer.Action;
+import georgi.gaydarov.gos.compiler.translator.actionizer.Operation;
+import georgi.gaydarov.gos.compiler.translator.validator.Validator;
 
 import java.util.List;
 
@@ -26,6 +26,6 @@ public class Compiler {
 			System.out.println(t.getValue() + " : "+t.getType());
 		}
 		
-		List<Action> actions = Translator.translateTokens(tokens);
+		List<Operation> actions = Translator.translateTokens(tokens);
 	}
 }

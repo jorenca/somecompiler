@@ -1,4 +1,4 @@
-package georgi.gaydarov.gos.compiler.syntaxvalidator;
+package georgi.gaydarov.gos.compiler.translator;
 
 public enum RawStatementType {
 DECLARATION,

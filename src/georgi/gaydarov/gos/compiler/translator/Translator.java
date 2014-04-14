@@ -1,19 +1,18 @@
 package georgi.gaydarov.gos.compiler.translator;
 
-import georgi.gaydarov.gos.compiler.syntaxvalidator.RawStatementType;
-import georgi.gaydarov.gos.compiler.syntaxvalidator.ValidationException;
-import georgi.gaydarov.gos.compiler.syntaxvalidator.Validator;
 import georgi.gaydarov.gos.compiler.tokenizing.Token;
 import georgi.gaydarov.gos.compiler.tokenizing.TokenType;
-import georgi.gaydarov.gos.compiler.translator.actionizer.Action;
+import georgi.gaydarov.gos.compiler.translator.actionizer.Operation;
 import georgi.gaydarov.gos.compiler.translator.actionizer.Actionizer;
+import georgi.gaydarov.gos.compiler.translator.validator.ValidationException;
+import georgi.gaydarov.gos.compiler.translator.validator.Validator;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class Translator {
-	public static List<Action> translateTokens(List<Token> tokens) {
-		List<Action> result = new LinkedList<Action>();
+	public static List<Operation> translateTokens(List<Token> tokens) {
+		List<Operation> result = new LinkedList<Operation>();
 		
 		RawStatement rawStatement = new RawStatement();
 		for(Token token : tokens)
@@ -25,7 +24,7 @@ public class Translator {
 			else
 			{
 				if(rawStatement.isEmpty()) continue;
-				List<Action> translatedStatement = translateStatement(rawStatement);
+				List<Operation> translatedStatement = translateStatement(rawStatement);
 				result.addAll(translatedStatement);
 				rawStatement.clear();
 			}
@@ -39,9 +38,9 @@ public class Translator {
 		return result;
 	}
 	
-	private static List<Action> translateStatement(RawStatement statement)
+	private static List<Operation> translateStatement(RawStatement statement)
 	{
-		List<Action> result = new LinkedList<Action>();
+		List<Operation> result = new LinkedList<Operation>();
 		
 		RawStatementType statementType = Validator.validateStatement(statement);
 		
@@ -61,7 +60,7 @@ public class Translator {
 		return result;
 	}
 	
-	private static List<Action> determineActions(RawStatementType type, RawStatement statement)
+	private static List<Operation> determineActions(RawStatementType type, RawStatement statement)
 	{
 		return Actionizer.simplify(type, statement);
 	}

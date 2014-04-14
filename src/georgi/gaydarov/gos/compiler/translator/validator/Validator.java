@@ -1,8 +1,9 @@
-package georgi.gaydarov.gos.compiler.syntaxvalidator;
+package georgi.gaydarov.gos.compiler.translator.validator;
 
 import georgi.gaydarov.gos.compiler.tokenizing.Token;
 import georgi.gaydarov.gos.compiler.tokenizing.TokenType;
 import georgi.gaydarov.gos.compiler.translator.RawStatement;
+import georgi.gaydarov.gos.compiler.translator.RawStatementType;
 
 import java.util.LinkedList;
 import java.util.List;
