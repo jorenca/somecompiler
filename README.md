@@ -35,6 +35,7 @@ x = x ;
 x + = 10 ; 
 x + = x ; 
 print! x ;
+```
 Results in:
 ```no-highlight
 MOV[AL] : addr(3), literal(9)
