@@ -8,6 +8,13 @@ import georgi.gaydarov.gos.compiler.tokenizing.TokenType;
 import georgi.gaydarov.gos.compiler.translator.RawStatement;
 import georgi.gaydarov.gos.compiler.translator.RawStatementType;
 
+/**
+ * Converts a {@link RawStatement} instance (high level code) to a {@link List<Operation>} 
+ * that, when executed, behave as expected.
+ * 
+ * @author Georgi Gaydarov
+ *
+ */
 public class Actionizer {
 	private static final MemoryMapper mapper = new MemoryMapper((short)0);
 	
@@ -23,16 +30,16 @@ public class Actionizer {
 				simplifyAllocation(statement);
 				break;
 
-			case SIMPLE_OPERATION:
-				result.add(simplifySimpleOperation(statement));
+			case DIRECT_OPERATION:
+				result.add(simplifyDirectOperation(statement));
 				break;
 				
 			case DIRECT_ASSIGNMENT:
 				result.add(simplifyDirectAssignment(statement));
 				break;
 				
-			case SIMPLE_ASSIGNMENT:
-				result.addAll(simplifySimpleAssignment(statement));
+			case OPERATION_ASSIGNMENT:
+				result.addAll(simplifyOperationAssignment(statement));
 				break;
 				
 			case FUNCTION_CALL:
@@ -53,7 +60,7 @@ public class Actionizer {
 		mapper.allocateVariable(varName);
 	}
 	
-	private static Operation simplifySimpleOperation(RawStatement statement)
+	private static Operation simplifyDirectOperation(RawStatement statement)
 	{
 		// <var_name> <operation> = <var_name or literal>
 		String resultVarName = statement.get(0).getValue();
@@ -88,20 +95,18 @@ public class Actionizer {
 	private static Operation simplifyDirectAssignment(RawStatement statement)
 	{
 		// <var_name> = <var_name or literal>
-		Token destination = statement.get(0);
 		assertTokenValue(statement, 1, "=");
-		Token operand = statement.get(2);
 		
 		RawStatement movStatement = new RawStatement();
-		movStatement.add(destination);
+		movStatement.add(statement.get(0));
 		movStatement.add(new Token(String.valueOf(Instruction.MOV.getRepresentation()), TokenType.OPERATION));
-		movStatement.add(new Token("=", TokenType.OPERATION));
-		movStatement.add(operand);
+		movStatement.add(statement.get(1));
+		movStatement.add(statement.get(2));
 		
-		return simplifySimpleOperation(movStatement);
+		return simplifyDirectOperation(movStatement);
 	}
 	
-	private static List<Operation> simplifySimpleAssignment(RawStatement statement)
+	private static List<Operation> simplifyOperationAssignment(RawStatement statement)
 	{
 		// <var_name> = <var_name or literal> <operation> <var_name or literal>
 		Token destination = statement.get(0);
@@ -121,7 +126,7 @@ public class Actionizer {
 		opStatement.add(operation);
 		opStatement.add(new Token("=", TokenType.OPERATION));
 		opStatement.add(operand2);
-		Operation op = simplifySimpleOperation(opStatement);
+		Operation op = simplifyDirectOperation(opStatement);
 		
 		
 		List<Operation> result = new LinkedList<Operation>();
@@ -172,29 +177,6 @@ public class Actionizer {
 			messageBuilder.append(index);
 			messageBuilder.append("].\nExpected [");
 			messageBuilder.append(expectedValue);
-			messageBuilder.append("].");
-			throw new ActionizingException(messageBuilder.toString());
-		}
-	}
-	
-	private static void assertTokenType(RawStatement statement, int index, TokenType expectedType)
-	{
-		Token token = statement.get(index);
-		TokenType tokenType = token.getType();
-		if(!tokenType.equals(expectedType))
-		{
-			String statementString = statement.getFullStatement();
-			StringBuilder messageBuilder = new StringBuilder();
-			messageBuilder.append("Statement syntax is not acceptable.\n");
-			messageBuilder.append(statementString);
-			messageBuilder.append("\nfor token '");
-			messageBuilder.append(token.getValue());
-			messageBuilder.append("' [");
-			messageBuilder.append(tokenType);
-			messageBuilder.append("] at index [");
-			messageBuilder.append(index);
-			messageBuilder.append("].\nExpected [");
-			messageBuilder.append(expectedType);
 			messageBuilder.append("].");
 			throw new ActionizingException(messageBuilder.toString());
 		}

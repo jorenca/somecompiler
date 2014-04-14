@@ -41,6 +41,6 @@ public enum Instruction
 				return i;
 			}
 		}
-		return null;
+		throw new ActionizingException("No instruction matched ["+representation+"].");
 	}
 }

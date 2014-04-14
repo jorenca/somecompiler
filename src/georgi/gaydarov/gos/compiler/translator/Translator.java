@@ -44,8 +44,8 @@ public class Translator {
 		
 		RawStatementType statementType = Validator.validateStatement(statement);
 		
-		if(statementType != RawStatementType.COMPLEX_ASSIGNMENT){
-			result.addAll(determineActions(statementType, statement));
+		if(statementType != RawStatementType.COMPLEX_OPERATION_ASSIGNMENT){
+			result.addAll(determineOperations(statementType, statement));
 		}
 		else
 		{
@@ -60,7 +60,7 @@ public class Translator {
 		return result;
 	}
 	
-	private static List<Operation> determineActions(RawStatementType type, RawStatement statement)
+	private static List<Operation> determineOperations(RawStatementType type, RawStatement statement)
 	{
 		return Actionizer.simplify(type, statement);
 	}

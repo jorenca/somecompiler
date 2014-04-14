@@ -25,7 +25,7 @@ public class Validator {
 		}
 		else if(statementRepresentation.matches(SIMPLE_OPERATION_PATTERN))
 		{
-			return RawStatementType.SIMPLE_OPERATION;
+			return RawStatementType.DIRECT_OPERATION;
 		}
 		else if(statementRepresentation.matches(DIRECT_ASSIGNMENT_PATTERN))
 		{
@@ -33,11 +33,11 @@ public class Validator {
 		}
 		else if(statementRepresentation.matches(SIMPLE_ASSIGNMENT_PATTERN))
 		{
-			return RawStatementType.SIMPLE_ASSIGNMENT;
+			return RawStatementType.OPERATION_ASSIGNMENT;
 		}
 		else if(statementRepresentation.matches(COMPLEX_ASSIGNMENT_PATTERN))
 		{
-			return RawStatementType.COMPLEX_ASSIGNMENT;
+			return RawStatementType.COMPLEX_OPERATION_ASSIGNMENT;
 		}
 		else if(statementRepresentation.matches(FUNCTION_CALL_PATTERN))
 		{
