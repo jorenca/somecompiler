@@ -13,7 +13,8 @@ Code:
 > var c ;
 > c = a + b ;
 > c + = 2 ; 
-> print! c ;";
+> print! c ;
+
 Results in :
 > MOV[AL] : addr(0), literal(5)
 > MOV[AL] : addr(1), literal(3)
@@ -30,6 +31,7 @@ And code:
 > x + = 10 ; 
 > x + = x ; 
 > print! x ;
+
 Results in:
 > MOV[AL] : addr(3), literal(9)
 > MOV[AA] : addr(3), addr(3)
