@@ -1,0 +1,21 @@
+package georgi.gaydarov.gos.compiler.tokenizing;
+
+public enum TokenType {
+	VAR_DECLARATION('D'),
+	VAR_NAME('N'),
+	LITERAL('L'),
+	OPERATION('O'),
+	FUNCTION('F'),
+	STATEMENT_END('E');
+	
+	private char representation;
+	private TokenType(char representation)
+	{
+		this.representation = representation;
+	}
+	
+	public char getRepresentation()
+	{
+		return representation;
+	}
+}
