@@ -15,7 +15,7 @@ public class Compiler {
 	public static void main(String[] args) throws IOException {
 		Compiler comp = new Compiler();
 		
-		String code = "cvar a ; \n a = 5 ;\n var b ; \n b = 3 ;\n var c ; c = a + b ; c + = 2 ; print! c ;";
+		String code = "cvar a ; \n a = 5 ;\n cvar d ; read! d ;\n var b ; read! b ;\n var c ; c = a + b ; c + = d ; c + = 2 ; print! c ;";
 		comp.compile(code);
 		
 		String code2 = "cvar x ; x = 9 ; x = x ; x + = 10 ; x + = x ; print! x ;";
