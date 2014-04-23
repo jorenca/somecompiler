@@ -1,4 +1,4 @@
-package georgi.gaydarov.gos.compiler.translator.actionizer;
+package georgi.gaydarov.gos.compiler.translator.actionizer.mappers;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class responsible for mapping variable name to memory addresses.
+ * Class responsible for mapping variable names to addresses.
  * 
  * @author Georgi Gaydarov
  *
  */
-public class MemoryMapper {
-	private final static int MEMORY_SIZE = 16000; // bytes
+public abstract class Mapper {
+	private final int MEMORY_SIZE; // bytes
 	private Map<String, Short> variableAddress = new HashMap<String, Short>();
 	private List<Short> freedAddresses = new LinkedList<Short>();
 	private short nextFreePointer;
@@ -21,11 +21,14 @@ public class MemoryMapper {
 	 * Constructs a memory mapper that starts mapping at a specified address.
 	 * @param startAddress - the start address.
 	 */
-	public MemoryMapper(short startAddress)
+	protected Mapper(short startAddress)
 	{
+		MEMORY_SIZE = getMemorySize();
 		nextFreePointer = startAddress;
 		// TODO implement more
 	}
+	
+	protected abstract int getMemorySize();
 	
 	/**
 	 * Sets the memory of a variable as free and available for further allocations.
@@ -44,7 +47,7 @@ public class MemoryMapper {
 	{
 		if(variableAddress.containsKey(variableName))
 		{
-			throw new MemoryMappingException("Variable named ["+variableName+"] already declared!");
+			throw new MappingException("Variable named ["+variableName+"] already declared!");
 		}
 		
 		if(freedAddresses.isEmpty())
@@ -56,7 +59,7 @@ public class MemoryMapper {
 			}
 			else
 			{
-				throw new MemoryMappingException("Out of memory!");
+				throw new MappingException("Out of memory!");
 			}
 		}
 		else
@@ -74,9 +77,20 @@ public class MemoryMapper {
 	{
 		if(!variableAddress.containsKey(variableName))
 		{
-			throw new MemoryMappingException("Variable named ["+variableName+"] was not declared!");
+			throw new MappingException("Variable named ["+variableName+"] was not declared!");
 		}
 		
 		return variableAddress.get(variableName);
+	}
+	
+	/**
+	 * Checks if a variable has been declared via this mapper.
+	 * 
+	 * @param variableName - the variable name to be checked.
+	 * @return true if such variable has been declared, false otherwise.
+	 */
+	public boolean isVariableDeclared(String variableName)
+	{
+		return variableAddress.containsKey(variableName);
 	}
 }

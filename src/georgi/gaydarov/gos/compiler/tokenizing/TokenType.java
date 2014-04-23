@@ -1,7 +1,8 @@
 package georgi.gaydarov.gos.compiler.tokenizing;
 
 public enum TokenType {
-	VAR_DECLARATION('D'),
+	MEMORY_VAR_DECLARATION('D'),
+	CACHE_VAR_DECLARATION('D'),
 	VAR_NAME('N'),
 	LITERAL('L'),
 	OPERATION('O'),

@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 public class Tokenizer {
 	private static final String VAR_DECLARE_REGEX = "var";
+	private static final String CACHE_VAR_DECLARE_REGEX = "cvar";
 	private static final String OPERATOR_REGEX = "[=+-/*]";
 	private static final String LITERAL_REGEX = "\\d+";
 	private static final String FUNCTION_REGEX = "[\\w]+!";
@@ -37,7 +38,11 @@ public class Tokenizer {
 		
 		if(tokenString.matches(VAR_DECLARE_REGEX))
 		{
-			result.setType(TokenType.VAR_DECLARATION);
+			result.setType(TokenType.MEMORY_VAR_DECLARATION);
+		}
+		else if(tokenString.matches(CACHE_VAR_DECLARE_REGEX))
+		{
+			result.setType(TokenType.CACHE_VAR_DECLARATION);
 		}
 		else if(tokenString.matches(OPERATOR_REGEX))
 		{

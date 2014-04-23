@@ -6,14 +6,18 @@ package georgi.gaydarov.gos.compiler.translator.actionizer;
  * @author Georgi Gaydarov
  *
  */
-public enum Operands
+public enum Operand
 {
 	/**
-	 * Address; Address
+	 * Address in the memory.
 	 */
-	AA,
+	A,
 	/**
-	 * Address; Literal
+	 * Address in the cache.
 	 */
-	AL;
+	C,
+	/**
+	 * Literal value.
+	 */
+	L;
 }

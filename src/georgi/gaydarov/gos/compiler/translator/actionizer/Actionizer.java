@@ -7,6 +7,9 @@ import georgi.gaydarov.gos.compiler.tokenizing.Token;
 import georgi.gaydarov.gos.compiler.tokenizing.TokenType;
 import georgi.gaydarov.gos.compiler.translator.RawStatement;
 import georgi.gaydarov.gos.compiler.translator.RawStatementType;
+import georgi.gaydarov.gos.compiler.translator.actionizer.mappers.CacheMapper;
+import georgi.gaydarov.gos.compiler.translator.actionizer.mappers.FunctionMapper;
+import georgi.gaydarov.gos.compiler.translator.actionizer.mappers.MemoryMapper;
 
 /**
  * Converts a {@link RawStatement} instance (high level code) to a {@link List<Operation>} 
@@ -16,7 +19,8 @@ import georgi.gaydarov.gos.compiler.translator.RawStatementType;
  *
  */
 public class Actionizer {
-	private static final MemoryMapper mapper = new MemoryMapper((short)0);
+	private static final MemoryMapper memory = new MemoryMapper((short)0);
+	private static final CacheMapper cache = new CacheMapper((short)0);
 	
 	
 	
@@ -55,37 +59,70 @@ public class Actionizer {
 	private static void simplifyAllocation(RawStatement statement)
 	{
 		// <var_keyword> <name_name>
+		TokenType allocationType = statement.get(0).getType();
 		Token nameToken = statement.get(1);
 		String varName = nameToken.getValue();
-		mapper.allocateVariable(varName);
+		
+		if(allocationType == TokenType.MEMORY_VAR_DECLARATION)
+		{
+			memory.allocateVariable(varName);
+		}
+		else
+		{
+			cache.allocateVariable(varName);
+		}
 	}
 	
 	private static Operation simplifyDirectOperation(RawStatement statement)
 	{
 		// <var_name> <operation> = <var_name or literal>
 		String resultVarName = statement.get(0).getValue();
-		short resultAddress = mapper.getVariableAddress(resultVarName);
+		short resultAddress;
+		Operand resultOperandType;
+		if(memory.isVariableDeclared(resultVarName))
+		{
+			resultAddress = memory.getVariableAddress(resultVarName);
+			resultOperandType = Operand.A;
+		}
+		else
+		{
+			resultAddress = cache.getVariableAddress(resultVarName);
+			resultOperandType = Operand.C;
+		}
 		
 		Token operation = statement.get(1);
 		char operationRepresentation = operation.getValue().charAt(0);
-		
 		assertTokenValue(statement, 2, "=");
-		
 		Token operand2 = statement.get(3);
 
 		Instruction operationInstruction = Instruction.getByRepresentation(operationRepresentation);
 		Operation op = new Operation();
 		op.setInstruction(operationInstruction);
 		op.setAddress1(resultAddress);
+		op.setOperand1(resultOperandType);
+		
+		String operand2Value = operand2.getValue();
 		switch(operand2.getType())
 		{
 			case LITERAL:
-				op.setOperands(Operands.AL);
-				op.setLiteral(Byte.parseByte(operand2.getValue()));
+				op.setOperand2(Operand.L);
+				op.setLiteral2(Byte.parseByte(operand2Value));
 				break;
 			case VAR_NAME:
-				op.setOperands(Operands.AA);
-				op.setAddress2(mapper.getVariableAddress(operand2.getValue()));
+				short op2Address;
+				Operand op2Type;
+				if(memory.isVariableDeclared(operand2Value))
+				{
+					op2Address = memory.getVariableAddress(operand2Value);
+					op2Type = Operand.A;
+				}
+				else
+				{
+					op2Address = cache.getVariableAddress(operand2Value);
+					op2Type = Operand.C;
+				}
+				op.setOperand2(op2Type);
+				op.setAddress2(op2Address);
 				break;
 		}
 		
@@ -139,20 +176,34 @@ public class Actionizer {
 	{
 		// <function_name>! <var_name or literal>
 		Token functionName = statement.get(0);
-		short functionAddress = FunctionMapper.map(functionName.getValue());
+		byte functionId = FunctionMapper.map(functionName.getValue());
 		Token operand = statement.get(1);
 		
 		Operation result = new Operation(Instruction.CALL);
-		result.setAddress1(functionAddress);
+		result.setOperand1(Operand.L);
+		result.setLiteral1(functionId);
+		String operandValue = operand.getValue();
 		switch(operand.getType())
 		{
 			case LITERAL:
-				result.setOperands(Operands.AL);
-				result.setLiteral(Byte.parseByte(operand.getValue()));
+				result.setOperand2(Operand.L);
+				result.setLiteral2(Byte.parseByte(operandValue));
 				break;
 			case VAR_NAME:
-				result.setOperands(Operands.AA);
-				result.setAddress2(mapper.getVariableAddress(operand.getValue()));
+				short opAddress;
+				Operand opType;
+				if(memory.isVariableDeclared(operandValue))
+				{
+					opAddress = memory.getVariableAddress(operandValue);
+					opType = Operand.A;
+				}
+				else
+				{
+					opAddress = cache.getVariableAddress(operandValue);
+					opType = Operand.C;
+				}
+				result.setOperand2(opType);
+				result.setAddress2(opAddress);
 				break;
 		}
 		return result;
