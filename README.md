@@ -1,7 +1,7 @@
 somecompiler
 ============
 
-Compiles &lt;some_name> high level code into &lt;some_other_name> bytecode.
+Compiles ``gc-basic`` high level code into ``gasm-basic`` bytecode.
 
 Examples:
 
