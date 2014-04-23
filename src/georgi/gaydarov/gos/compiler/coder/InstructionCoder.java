@@ -13,13 +13,13 @@ class InstructionCoder {
 		for(Instruction instruction : Instruction.values())
 		{
 			instructionMap.put(instruction, instructionIdIterator);
+			instructionIdIterator++;
 		}
 	}
 	
 	public static byte getCode(Instruction instruction)
 	{
 		byte rawCode = instructionMap.get(instruction);
-		rawCode <<= 3;
 		return rawCode;
 	}
 }
